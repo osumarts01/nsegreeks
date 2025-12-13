@@ -28,3 +28,23 @@ function greeks({ S, K, r, t, iv, type }) {
             r * K * Math.exp(-r * t) * normCDF(-d2)) / 365
   };
 }
+export default function handler(req, res) {
+  res.status(200).json({
+    CE: greeks({
+      S: 26046.95,
+      K: 26000,
+      r: 0.06,
+      t: 3 / 365,
+      iv: 0.14,
+      type: "CE"
+    }),
+    PE: greeks({
+      S: 26046.95,
+      K: 26000,
+      r: 0.06,
+      t: 3 / 365,
+      iv: 0.14,
+      type: "PE"
+    })
+  });
+}
