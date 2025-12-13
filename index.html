@@ -1,78 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NSE Greeks</title>
-  <style>
-    body {
-      margin: 0;
-      background: #0d1117;
-      color: #e6edf3;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .box {
-      background: #161b22;
-      border-radius: 10px;
-      padding: 20px 30px;
-      min-width: 320px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
-    }
-    h1 {
-      margin: 0 0 15px;
-      text-align: center;
-      color: #58a6ff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      padding: 8px;
-      text-align: left;
-      border-bottom: 1px solid #30363d;
-    }
-    th {
-      color: #8b949e;
-      font-weight: normal;
-    }
-    td.value {
-      text-align: right;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NIFTY Greeks</title>
+<style>
+  body{
+    margin:0;
+    background:#0b0f1a;
+    font-family:Arial, sans-serif;
+    color:#e6edf3;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+  }
+  .card{
+    background:#121826;
+    border-radius:10px;
+    padding:20px 24px;
+    min-width:420px;
+    box-shadow:0 0 30px rgba(0,0,0,.5);
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:15px;
+  }
+  th,td{
+    padding:10px;
+    border-bottom:1px solid #1f2937;
+    text-align:right;
+  }
+  th:first-child, td:first-child{
+    text-align:left;
+  }
+  thead th{
+    color:#9ca3af;
+    font-weight:600;
+  }
+  .pos{color:#22c55e;}
+  .neg{color:#ef4444;}
+  h2{
+    text-align:center;
+    margin:0 0 12px;
+    color:#60a5fa;
+  }
+</style>
 </head>
+
 <body>
-  <div class="box">
-    <h1>NIFTY Greeks</h1>
-    <table>
-      <tr><th>Delta</th><td class="value" id="delta">--</td></tr>
-      <tr><th>Gamma</th><td class="value" id="gamma">--</td></tr>
-      <tr><th>Vega</th><td class="value" id="vega">--</td></tr>
-      <tr><th>Theta</th><td class="value" id="theta">--</td></tr>
-    </table>
-  </div>
+<div class="card">
+  <h2>Greeks</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Greeks</th>
+        <th>CALL</th>
+        <th>PUT</th>
+        <th>DIFF</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Delta</td>
+        <td id="c_delta">--</td>
+        <td id="p_delta">--</td>
+        <td id="d_delta">--</td>
+      </tr>
+      <tr>
+        <td>Vega</td>
+        <td id="c_vega">--</td>
+        <td id="p_vega">--</td>
+        <td id="d_vega">--</td>
+      </tr>
+      <tr>
+        <td>Gamma</td>
+        <td id="c_gamma">--</td>
+        <td id="p_gamma">--</td>
+        <td id="d_gamma">--</td>
+      </tr>
+      <tr>
+        <td>Theta</td>
+        <td id="c_theta">--</td>
+        <td id="p_theta">--</td>
+        <td id="d_theta">--</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-  <script>
-    async function loadGreeks() {
-      try {
-        const res = await fetch("/api/greeks");
-        const data = await res.json();
-        document.getElementById("delta").innerText = data.delta.toFixed(4);
-        document.getElementById("gamma").innerText = data.gamma.toFixed(6);
-        document.getElementById("vega").innerText  = data.vega.toFixed(2);
-        document.getElementById("theta").innerText = data.theta.toFixed(2);
-      } catch (e) {
-        console.error(e);
-      }
-    }
+<script>
+async function load(){
+  const r = await fetch("/api/greeks");
+  const g = await r.json();
 
-    loadGreeks();
-    setInterval(loadGreeks, 5000);
-  </script>
+  // TEMP: CE = value, PE = negative mirror (will replace later)
+  const ce = g;
+  const pe = {
+    delta: -g.delta,
+    gamma: g.gamma,
+    vega: g.vega,
+    theta: -g.theta
+  };
+
+  function set(id,val){
+    document.getElementById(id).innerText = val.toFixed(2);
+  }
+  function setDiff(id,val){
+    const el=document.getElementById(id);
+    el.innerText=val.toFixed(2);
+    el.className = val>=0 ? "pos":"neg";
+  }
+
+  set("c_delta",ce.delta); set("p_delta",pe.delta); setDiff("d_delta",ce.delta-pe.delta);
+  set("c_vega",ce.vega);   set("p_vega",pe.vega);   setDiff("d_vega",ce.vega-pe.vega);
+  set("c_gamma",ce.gamma); set("p_gamma",pe.gamma); setDiff("d_gamma",ce.gamma-pe.gamma);
+  set("c_theta",ce.theta); set("p_theta",pe.theta); setDiff("d_theta",ce.theta-pe.theta);
+}
+
+load();
+setInterval(load,5000);
+</script>
 </body>
 </html>
