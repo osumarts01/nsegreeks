@@ -1,210 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>NIFTY Greeks</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>NSE Greeks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      background: radial-gradient(circle at top, #0b1a33, #050a14);
-      font-family: Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-    }
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle at top,#0b1833,#050b18);
+  font-family:Arial,Helvetica,sans-serif;
+  color:#e5e7eb;
+}
 
-    .card {
-      width: 420px;
-      background: rgba(15, 25, 50, 0.95);
-      border-radius: 14px;
-      padding: 22px;
-      box-shadow: 0 0 40px rgba(0,0,0,0.6);
-    }
+.panel{
+  width:430px;
+  background:linear-gradient(180deg,#0f1c36,#0a1226);
+  border-radius:18px;
+  padding:26px;
+  box-shadow:0 0 50px rgba(0,0,0,.7);
+}
 
-    h1 {
-      text-align: center;
-      color: #6fb3ff;
-      margin-bottom: 14px;
-    }
+h1{
+  text-align:center;
+  color:#60a5fa;
+  margin:0 0 18px;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:15px;
+}
 
-    th, td {
-      padding: 8px;
-      text-align: right;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
+th,td{
+  padding:10px;
+  text-align:center;
+}
 
-    th:first-child, td:first-child {
-      text-align: left;
-    }
+th{
+  color:#93c5fd;
+  border-bottom:1px solid #1f2a44;
+}
 
-    th {
-      color: #9cc9ff;
-      font-weight: normal;
-    }
+td{
+  border-bottom:1px solid #1f2a44;
+}
 
-    .green { color: #3dff8e; }
-    .red { color: #ff4d4d; }
+.left{
+  text-align:left;
+}
 
-    .decision {
-      margin-top: 16px;
-      padding: 14px;
-      border-radius: 10px;
-      text-align: center;
-      background: rgba(0,0,0,0.35);
-    }
+.green{color:#22c55e;}
+.red{color:#ef4444;}
+.gray{color:#9ca3af;}
 
-    .badge {
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
+.decision{
+  margin-top:18px;
+  padding:18px;
+  background:linear-gradient(180deg,#0b1328,#070d1a);
+  border-radius:14px;
+  text-align:center;
+  box-shadow:inset 0 0 20px rgba(0,0,0,.6);
+}
 
-    .ce { background: #0f5132; color: #3dff8e; }
-    .pe { background: #5b0f14; color: #ff4d4d; }
+.badge{
+  display:inline-block;
+  padding:8px 20px;
+  border-radius:999px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
 
-    .prob {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #bcdcff;
-    }
+.badge.ce{background:#16a34a;}
+.badge.pe{background:#dc2626;}
+.badge.none{background:#374151;}
 
-    .footer {
-      margin-top: 10px;
-      font-size: 12px;
-      text-align: center;
-      color: #9aa8c7;
-    }
-  </style>
+.sub{
+  font-size:14px;
+  color:#d1d5db;
+}
+
+.prob{
+  margin-top:6px;
+  font-size:14px;
+  color:#e5e7eb;
+}
+
+.footer{
+  margin-top:14px;
+  text-align:center;
+  font-size:12px;
+  color:#6b7280;
+}
+</style>
 </head>
 
 <body>
-  <div class="card">
-    <h1>Greeks</h1>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Greeks</th>
-          <th>CALL</th>
-          <th>PUT</th>
-          <th>DIFF</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Delta</td>
-          <td id="ceDelta">--</td>
-          <td id="peDelta">--</td>
-          <td id="deltaDiff">--</td>
-        </tr>
-        <tr>
-          <td>Vega</td>
-          <td id="ceVega">--</td>
-          <td id="peVega">--</td>
-          <td id="vegaDiff">--</td>
-        </tr>
-        <tr>
-          <td>Gamma</td>
-          <td id="ceGamma">--</td>
-          <td id="peGamma">--</td>
-          <td id="gammaDiff">--</td>
-        </tr>
-        <tr>
-          <td>Theta</td>
-          <td id="ceTheta">--</td>
-          <td id="peTheta">--</td>
-          <td id="thetaDiff">--</td>
-        </tr>
-      </tbody>
-    </table>
+<div class="panel">
+  <h1>Greeks</h1>
 
-    <div class="decision" id="decisionBox">
-      <div class="badge" id="biasBadge">WAIT</div>
-      <div id="biasText">Waiting for alignment</div>
-      <div class="prob" id="probability">CE: 50% | PE: 50%</div>
-    </div>
+  <table>
+    <thead>
+      <tr>
+        <th class="left">Greeks</th>
+        <th>CALL</th>
+        <th>PUT</th>
+        <th>DIFF</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="left">Delta</td>
+        <td id="ceDelta"></td>
+        <td id="peDelta"></td>
+        <td id="deltaDiff"></td>
+      </tr>
+      <tr>
+        <td class="left">Vega</td>
+        <td id="ceVega"></td>
+        <td id="peVega"></td>
+        <td id="vegaDiff"></td>
+      </tr>
+      <tr>
+        <td class="left">Gamma</td>
+        <td id="ceGamma"></td>
+        <td id="peGamma"></td>
+        <td id="gammaDiff"></td>
+      </tr>
+      <tr>
+        <td class="left">Theta</td>
+        <td id="ceTheta"></td>
+        <td id="peTheta"></td>
+        <td id="thetaDiff"></td>
+      </tr>
+    </tbody>
+  </table>
 
-    <div class="footer">Auto refresh • 5 sec</div>
+  <div class="decision">
+    <div id="biasBadge" class="badge none">NO TRADE</div>
+    <div id="biasText" class="sub">Waiting for alignment</div>
+    <div id="probText" class="prob"></div>
   </div>
 
-  <script>
-    async function loadGreeks() {
-      try {
-        const res = await fetch("/api/greeks");
-        const data = await res.json();
+  <div class="footer">Auto refresh • 5 sec</div>
+</div>
 
-        const CE = data.CE;
-        const PE = data.PE;
+<script>
+async function load(){
+  const r = await fetch('/api/greeks');
+  const d = await r.json();
 
-        const deltaDiff = CE.delta - Math.abs(PE.delta);
-        const thetaDiff = PE.theta - CE.theta;
+  const CE = d.CE;
+  const PE = d.PE;
 
-        document.getElementById("ceDelta").innerText = CE.delta.toFixed(2);
-        document.getElementById("peDelta").innerText = PE.delta.toFixed(2);
-        document.getElementById("deltaDiff").innerText = deltaDiff.toFixed(2);
+  const deltaDiff = CE.delta - Math.abs(PE.delta);
+  const thetaDiff = PE.theta - CE.theta;
 
-        document.getElementById("ceVega").innerText = CE.vega.toFixed(2);
-        document.getElementById("peVega").innerText = PE.vega.toFixed(2);
-        document.getElementById("vegaDiff").innerText = (CE.vega - PE.vega).toFixed(2);
+  function set(id,val,good){
+    const e=document.getElementById(id);
+    e.textContent=val.toFixed(2);
+    e.className=good?'green':'red';
+  }
 
-        document.getElementById("ceGamma").innerText = CE.gamma.toFixed(4);
-        document.getElementById("peGamma").innerText = PE.gamma.toFixed(4);
-        document.getElementById("gammaDiff").innerText = (CE.gamma - PE.gamma).toFixed(4);
+  set('ceDelta',CE.delta,CE.delta>0);
+  set('peDelta',PE.delta,PE.delta<0);
+  set('deltaDiff',deltaDiff,deltaDiff>0);
 
-        document.getElementById("ceTheta").innerText = CE.theta.toFixed(2);
-        document.getElementById("peTheta").innerText = PE.theta.toFixed(2);
-        document.getElementById("thetaDiff").innerText = thetaDiff.toFixed(2);
+  set('ceVega',CE.vega,true);
+  set('peVega',PE.vega,true);
+  set('vegaDiff',CE.vega-PE.vega,Math.abs(CE.vega-PE.vega)<1);
 
-        let ceProb = 50;
-        let peProb = 50;
+  set('ceGamma',CE.gamma,true);
+  set('peGamma',PE.gamma,true);
+  set('gammaDiff',CE.gamma-PE.gamma,Math.abs(CE.gamma-PE.gamma)<0.001);
 
-        let bias = "WAIT";
-        let text = "No clear edge";
-        let cls = "";
+  set('ceTheta',CE.theta,CE.theta<0);
+  set('peTheta',PE.theta,PE.theta<0);
+  set('thetaDiff',thetaDiff,thetaDiff>0);
 
-        if (deltaDiff > 0 && thetaDiff > 0) {
-          bias = "CE BIAS";
-          text = "Delta + Theta aligned";
-          cls = "ce";
-          ceProb = 60;
-          peProb = 40;
-        }
+  let bias='none';
+  let ceProb=50, peProb=50;
+  let text='No clear edge';
 
-        if (deltaDiff < 0 && thetaDiff < 0) {
-          bias = "PE BIAS";
-          text = "Delta + Theta aligned";
-          cls = "pe";
-          ceProb = 40;
-          peProb = 60;
-        }
+  if(deltaDiff>0 && thetaDiff>0){
+    bias='ce';
+    text='Delta + Theta aligned';
+    ceProb=60; peProb=40;
+  }
+  if(deltaDiff<0 && thetaDiff<0){
+    bias='pe';
+    text='Delta + Theta aligned';
+    ceProb=40; peProb=60;
+  }
 
-        const badge = document.getElementById("biasBadge");
-        badge.innerText = bias;
-        badge.className = "badge " + cls;
+  const badge=document.getElementById('biasBadge');
+  badge.className='badge '+bias;
+  badge.textContent=bias==='ce'?'CE BIAS':bias==='pe'?'PE BIAS':'NO TRADE';
 
-        document.getElementById("biasText").innerText = text;
-        document.getElementById("probability").innerText =
-          `CE: ${ceProb}% | PE: ${peProb}%`;
+  document.getElementById('biasText').textContent=text;
+  document.getElementById('probText').textContent=`CE: ${ceProb}% | PE: ${peProb}%`;
+}
 
-      } catch (e) {
-        console.error(e);
-      }
-    }
+load();
+setInterval(load,5000);
+</script>
 
-    loadGreeks();
-    setInterval(loadGreeks, 5000);
-  </script>
 </body>
 </html>
