@@ -1,45 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NSE Greeks – Coming Soon</title>
-    <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            background: #0d1117;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-        .logo {
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #00c3ff;
-            letter-spacing: 2px;
-        }
-        .coming {
-            font-size: 28px;
-            opacity: 0.8;
-        }
-        .footer {
-            position: absolute;
-            bottom: 25px;
-            font-size: 14px;
-            color: #aaa;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NSE Greeks</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .box {
+      background: #161b22;
+      border-radius: 10px;
+      padding: 20px 30px;
+      min-width: 320px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+    h1 {
+      margin: 0 0 15px;
+      text-align: center;
+      color: #58a6ff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #30363d;
+    }
+    th {
+      color: #8b949e;
+      font-weight: normal;
+    }
+    td.value {
+      text-align: right;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <div class="logo">NSE GREEKS</div>
-    <div class="coming">Coming Soon...</div>
+  <div class="box">
+    <h1>NIFTY Greeks</h1>
+    <table>
+      <tr><th>Delta</th><td class="value" id="delta">--</td></tr>
+      <tr><th>Gamma</th><td class="value" id="gamma">--</td></tr>
+      <tr><th>Vega</th><td class="value" id="vega">--</td></tr>
+      <tr><th>Theta</th><td class="value" id="theta">--</td></tr>
+    </table>
+  </div>
 
-    <div class="footer">© 2025 nsegreeks.in</div>
+  <script>
+    async function loadGreeks() {
+      try {
+        const res = await fetch("/api/greeks");
+        const data = await res.json();
+        document.getElementById("delta").innerText = data.delta.toFixed(4);
+        document.getElementById("gamma").innerText = data.gamma.toFixed(6);
+        document.getElementById("vega").innerText  = data.vega.toFixed(2);
+        document.getElementById("theta").innerText = data.theta.toFixed(2);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    loadGreeks();
+    setInterval(loadGreeks, 5000);
+  </script>
 </body>
 </html>
