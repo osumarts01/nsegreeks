@@ -1,47 +1,14 @@
-export default function handler(req, res) {
-  const normPDF = x => Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
-  const normCDF = x => 0.5 * (1 + erf(x / Math.sqrt(2)));
+const ce = greeks({ S, K, r, t, iv, type: "CE" });
+const pe = greeks({ S, K, r, t, iv, type: "PE" });
 
-  function erf(x) {
-    const sign = x >= 0 ? 1 : -1;
-    x = Math.abs(x);
-    const a1 = 0.254829592, a2 = -0.284496736,
-          a3 = 1.421413741, a4 = -1.453152027,
-          a5 = 1.061405429, p = 0.3275911;
-    const t = 1 / (1 + p * x);
-    const y = 1 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t) * Math.exp(-x * x);
-    return sign * y;
-  }
-
-  function greeks({ S, K, r, t, iv, type }) {
-    const d1 = (Math.log(S / K) + (r + 0.5 * iv * iv) * t) / (iv * Math.sqrt(t));
-    const d2 = d1 - iv * Math.sqrt(t);
-
-    const delta =
-      type === "CE" ? normCDF(d1) : normCDF(d1) - 1;
-
-    const gamma = normPDF(d1) / (S * iv * Math.sqrt(t));
-    const vega  = (S * normPDF(d1) * Math.sqrt(t)) / 100;
-
-    const theta =
-      type === "CE"
-        ? (-S * normPDF(d1) * iv / (2 * Math.sqrt(t)) -
-            r * K * Math.exp(-r * t) * normCDF(d2)) / 365
-        : (-S * normPDF(d1) * iv / (2 * Math.sqrt(t)) +
-            r * K * Math.exp(-r * t) * normCDF(-d2)) / 365;
-
-    return { delta, gamma, vega, theta };
-  }
-
-  // --- INPUTS (TEMP STATIC, NEXT STEP WILL MAKE LIVE) ---
-  const S = 26046.95;       // NIFTY LTP
-  const K = 26000;          // ATM
-  const r = 0.06;           // Risk-free
-  const t = 3 / 365;        // Days to expiry
-  const iv = 0.14;          // IV
-
-  const CE = greeks({ S, K, r, t, iv, type: "CE" });
-  const PE = greeks({ S, K, r, t, iv, type: "PE" });
-
-  res.status(200).json({ CE, PE });
-}
+res.status(200).json({
+  CE: ce,
+  PE: pe,
+  DIFF: {
+    delta: +(ce.delta - pe.delta).toFixed(2),
+    gamma: +(ce.gamma - pe.gamma).toFixed(4),
+    vega: +(ce.vega - pe.vega).toFixed(2),
+    theta: +(ce.theta - pe.theta).toFixed(2)
+  },
+  ts: Date.now()
+});
