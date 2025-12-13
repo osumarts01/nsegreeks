@@ -100,46 +100,32 @@ th{
 </div>
 
 <script>
-async function load(){
-  try{
-    const r = await fetch("/api/greeks");
-    const data = await r.json();
+async function loadGreeks() {
+  const res = await fetch("/api/greeks");
+  const data = await res.json();
 
-    const ce = data.CE;
-    const pe = data.PE;
+  const CE = data.CE;
+  const PE = data.PE;
 
-    function set(id,v){
-      document.getElementById(id).innerText = v.toFixed(2);
-    }
-    function diff(id,v){
-      const el=document.getElementById(id);
-      el.innerText=v.toFixed(2);
-      el.className=v>=0?"pos":"neg";
-    }
+  document.getElementById("ce-delta").innerText = CE.delta.toFixed(2);
+  document.getElementById("pe-delta").innerText = PE.delta.toFixed(2);
+  document.getElementById("diff-delta").innerText = (CE.delta - PE.delta).toFixed(2);
 
-    set("c_delta",ce.delta);
-    set("p_delta",pe.delta);
-    diff("d_delta",ce.delta - pe.delta);
+  document.getElementById("ce-vega").innerText = CE.vega.toFixed(2);
+  document.getElementById("pe-vega").innerText = PE.vega.toFixed(2);
+  document.getElementById("diff-vega").innerText = (CE.vega - PE.vega).toFixed(2);
 
-    set("c_vega",ce.vega);
-    set("p_vega",pe.vega);
-    diff("d_vega",ce.vega - pe.vega);
+  document.getElementById("ce-gamma").innerText = CE.gamma.toFixed(4);
+  document.getElementById("pe-gamma").innerText = PE.gamma.toFixed(4);
+  document.getElementById("diff-gamma").innerText = (CE.gamma - PE.gamma).toFixed(4);
 
-    set("c_gamma",ce.gamma);
-    set("p_gamma",pe.gamma);
-    diff("d_gamma",ce.gamma - pe.gamma);
-
-    set("c_theta",ce.theta);
-    set("p_theta",pe.theta);
-    diff("d_theta",ce.theta - pe.theta);
-
-  }catch(e){
-    console.error(e);
-  }
+  document.getElementById("ce-theta").innerText = CE.theta.toFixed(2);
+  document.getElementById("pe-theta").innerText = PE.theta.toFixed(2);
+  document.getElementById("diff-theta").innerText = (CE.theta - PE.theta).toFixed(2);
 }
 
-load();
-setInterval(load,5000);
+loadGreeks();
+setInterval(loadGreeks, 5000);
 </script>
 
 </body>
