@@ -1,132 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>NIFTY Greeks</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NSE Greeks</title>
 
-<style>
-body{
-  margin:0;
-  height:100vh;
-  background:radial-gradient(circle at top,#0b1220,#020617);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-family:Arial,Helvetica,sans-serif;
-  color:#fff;
-}
-.card{
-  background:rgba(15,23,42,.75);
-  border-radius:14px;
-  padding:24px 28px;
-  box-shadow:0 0 0 1px rgba(148,163,184,.15),0 20px 40px rgba(0,0,0,.6);
-  min-width:360px;
-}
-h1{
-  text-align:center;
-  margin:0 0 14px;
-  color:#60a5fa;
-  font-size:22px;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
-}
-th,td{
-  padding:8px 6px;
-  border-bottom:1px solid rgba(148,163,184,.15);
-  text-align:right;
-}
-th:first-child,td:first-child{
-  text-align:left;
-}
-th{
-  color:#cbd5f5;
-  font-weight:600;
-}
-.pos{color:#22c55e;font-weight:600;}
-.neg{color:#ef4444;font-weight:600;}
-.footer{
-  margin-top:14px;
-  text-align:center;
-  font-size:12px;
-  color:#94a3b8;
-}
-</style>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(circle at top left, #0d1b2a, #020617);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      color: #fff;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 14px;
+      padding: 22px 26px;
+      width: 420px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      text-align: center;
+      color: #60a5fa;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+      color: #93c5fd;
+      font-weight: 600;
+    }
+
+    td:first-child {
+      text-align: left;
+      color: #cbd5f5;
+    }
+
+    .pos {
+      color: #22c55e;
+    }
+
+    .neg {
+      color: #ef4444;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="card">
+    <h2>Greeks</h2>
 
-<div class="card">
-  <h1>Greeks</h1>
-  <table>
-    <tr>
-      <th>Greeks</th>
-      <th>CALL</th>
-      <th>PUT</th>
-      <th>DIFF</th>
-    </tr>
-    <tr>
-      <td>Delta</td>
-      <td id="c_delta">--</td>
-      <td id="p_delta">--</td>
-      <td id="d_delta">--</td>
-    </tr>
-    <tr>
-      <td>Vega</td>
-      <td id="c_vega">--</td>
-      <td id="p_vega">--</td>
-      <td id="d_vega">--</td>
-    </tr>
-    <tr>
-      <td>Gamma</td>
-      <td id="c_gamma">--</td>
-      <td id="p_gamma">--</td>
-      <td id="d_gamma">--</td>
-    </tr>
-    <tr>
-      <td>Theta</td>
-      <td id="c_theta">--</td>
-      <td id="p_theta">--</td>
-      <td id="d_theta">--</td>
-    </tr>
-  </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Greeks</th>
+          <th>CALL</th>
+          <th>PUT</th>
+          <th>DIFF</th>
+        </tr>
+      </thead>
 
-  <div class="footer">
-    Auto refresh • 5 sec
+      <tbody>
+        <tr>
+          <td>Delta</td>
+          <td id="ce-delta">--</td>
+          <td id="pe-delta">--</td>
+          <td id="diff-delta">--</td>
+        </tr>
+
+        <tr>
+          <td>Vega</td>
+          <td id="ce-vega">--</td>
+          <td id="pe-vega">--</td>
+          <td id="diff-vega">--</td>
+        </tr>
+
+        <tr>
+          <td>Gamma</td>
+          <td id="ce-gamma">--</td>
+          <td id="pe-gamma">--</td>
+          <td id="diff-gamma">--</td>
+        </tr>
+
+        <tr>
+          <td>Theta</td>
+          <td id="ce-theta">--</td>
+          <td id="pe-theta">--</td>
+          <td id="diff-theta">--</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">Auto refresh • 5 sec</div>
   </div>
-</div>
 
-<script>
-async function loadGreeks() {
-  const res = await fetch("/api/greeks");
-  const data = await res.json();
+  <!-- SCRIPT MUST BE HERE -->
+  <script>
+    async function loadGreeks() {
+      try {
+        const res = await fetch("/api/greeks");
+        const data = await res.json();
 
-  const CE = data.CE;
-  const PE = data.PE;
+        const CE = data.CE;
+        const PE = data.PE;
 
-  document.getElementById("ce-delta").innerText = CE.delta.toFixed(2);
-  document.getElementById("pe-delta").innerText = PE.delta.toFixed(2);
-  document.getElementById("diff-delta").innerText = (CE.delta - PE.delta).toFixed(2);
+        set("ce-delta", CE.delta, 2);
+        set("pe-delta", PE.delta, 2);
+        set("diff-delta", CE.delta - PE.delta, 2);
 
-  document.getElementById("ce-vega").innerText = CE.vega.toFixed(2);
-  document.getElementById("pe-vega").innerText = PE.vega.toFixed(2);
-  document.getElementById("diff-vega").innerText = (CE.vega - PE.vega).toFixed(2);
+        set("ce-vega", CE.vega, 2);
+        set("pe-vega", PE.vega, 2);
+        set("diff-vega", CE.vega - PE.vega, 2);
 
-  document.getElementById("ce-gamma").innerText = CE.gamma.toFixed(4);
-  document.getElementById("pe-gamma").innerText = PE.gamma.toFixed(4);
-  document.getElementById("diff-gamma").innerText = (CE.gamma - PE.gamma).toFixed(4);
+        set("ce-gamma", CE.gamma, 4);
+        set("pe-gamma", PE.gamma, 4);
+        set("diff-gamma", CE.gamma - PE.gamma, 4);
 
-  document.getElementById("ce-theta").innerText = CE.theta.toFixed(2);
-  document.getElementById("pe-theta").innerText = PE.theta.toFixed(2);
-  document.getElementById("diff-theta").innerText = (CE.theta - PE.theta).toFixed(2);
-}
+        set("ce-theta", CE.theta, 2);
+        set("pe-theta", PE.theta, 2);
+        set("diff-theta", CE.theta - PE.theta, 2);
+      } catch (e) {
+        console.error("Fetch error", e);
+      }
+    }
 
-loadGreeks();
-setInterval(loadGreeks, 5000);
-</script>
+    function set(id, value, fix) {
+      const el = document.getElementById(id);
+      const v = Number(value).toFixed(fix);
+      el.innerText = v;
+      el.className = v >= 0 ? "pos" : "neg";
+    }
 
+    loadGreeks();
+    setInterval(loadGreeks, 5000);
+  </script>
 </body>
 </html>
