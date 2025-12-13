@@ -17,9 +17,11 @@ export default function handler(req, res) {
     const d1 = (Math.log(S / K) + (r + 0.5 * iv * iv) * t) / (iv * Math.sqrt(t));
     const d2 = d1 - iv * Math.sqrt(t);
 
-    const delta = type === "CE" ? normCDF(d1) : normCDF(d1) - 1;
+    const delta =
+      type === "CE" ? normCDF(d1) : normCDF(d1) - 1;
+
     const gamma = normPDF(d1) / (S * iv * Math.sqrt(t));
-    const vega = (S * normPDF(d1) * Math.sqrt(t)) / 100;
+    const vega  = (S * normPDF(d1) * Math.sqrt(t)) / 100;
 
     const theta =
       type === "CE"
@@ -31,14 +33,15 @@ export default function handler(req, res) {
     return { delta, gamma, vega, theta };
   }
 
-  const data = greeks({
-    S: 26046.95,
-    K: 26000,
-    r: 0.06,
-    t: 3 / 365,
-    iv: 0.14,
-    type: "CE"
-  });
+  // --- INPUTS (TEMP STATIC, NEXT STEP WILL MAKE LIVE) ---
+  const S = 26046.95;       // NIFTY LTP
+  const K = 26000;          // ATM
+  const r = 0.06;           // Risk-free
+  const t = 3 / 365;        // Days to expiry
+  const iv = 0.14;          // IV
 
-  res.status(200).json(data);
+  const CE = greeks({ S, K, r, t, iv, type: "CE" });
+  const PE = greeks({ S, K, r, t, iv, type: "PE" });
+
+  res.status(200).json({ CE, PE });
 }
