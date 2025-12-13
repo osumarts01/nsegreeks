@@ -1,214 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>NSE Greeks</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<title>NSE Greeks – AOC Style</title>
 
 <style>
-body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:radial-gradient(circle at top,#0b1833,#050b18);
-  font-family:Arial,Helvetica,sans-serif;
-  color:#e5e7eb;
-}
+  body {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at top, #0b1a33, #050b18);
+    font-family: Arial, sans-serif;
+    color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-.panel{
-  width:430px;
-  background:linear-gradient(180deg,#0f1c36,#0a1226);
-  border-radius:18px;
-  padding:26px;
-  box-shadow:0 0 50px rgba(0,0,0,.7);
-}
+  .card {
+    width: 420px;
+    background: linear-gradient(180deg, #0f1f3d, #0a1226);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  }
 
-h1{
-  text-align:center;
-  color:#60a5fa;
-  margin:0 0 18px;
-}
+  h1 {
+    text-align: center;
+    color: #6fb6ff;
+    margin-bottom: 14px;
+  }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:15px;
-}
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+  }
 
-th,td{
-  padding:10px;
-  text-align:center;
-}
+  th, td {
+    padding: 8px;
+    border-bottom: 1px solid #1f2a44;
+    text-align: center;
+    font-size: 14px;
+  }
 
-th{
-  color:#93c5fd;
-  border-bottom:1px solid #1f2a44;
-}
+  th {
+    color: #93c5fd;
+  }
 
-td{
-  border-bottom:1px solid #1f2a44;
-}
+  .green { color: #22c55e; }
+  .red { color: #ef4444; }
+  .neutral { color: #9ca3af; }
 
-.left{
-  text-align:left;
-}
+  .decision {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    text-align: center;
+    background: #020617;
+  }
 
-.green{color:#22c55e;}
-.red{color:#ef4444;}
-.gray{color:#9ca3af;}
+  .decision.ce { background: linear-gradient(180deg,#14532d,#052e16); }
+  .decision.pe { background: linear-gradient(180deg,#7f1d1d,#450a0a); }
+  .decision.wait { background: linear-gradient(180deg,#1e293b,#020617); }
 
-.decision{
-  margin-top:18px;
-  padding:18px;
-  background:linear-gradient(180deg,#0b1328,#070d1a);
-  border-radius:14px;
-  text-align:center;
-  box-shadow:inset 0 0 20px rgba(0,0,0,.6);
-}
+  .badge {
+    display: inline-block;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
 
-.badge{
-  display:inline-block;
-  padding:8px 20px;
-  border-radius:999px;
-  font-weight:bold;
-  margin-bottom:8px;
-}
+  .badge.ce { background:#22c55e; color:#022c22; }
+  .badge.pe { background:#ef4444; color:#450a0a; }
+  .badge.wait { background:#64748b; }
 
-.badge.ce{background:#16a34a;}
-.badge.pe{background:#dc2626;}
-.badge.none{background:#374151;}
+  .prob {
+    font-size: 13px;
+    margin-top: 4px;
+    opacity: 0.9;
+  }
 
-.sub{
-  font-size:14px;
-  color:#d1d5db;
-}
-
-.prob{
-  margin-top:6px;
-  font-size:14px;
-  color:#e5e7eb;
-}
-
-.footer{
-  margin-top:14px;
-  text-align:center;
-  font-size:12px;
-  color:#6b7280;
-}
+  .footer {
+    margin-top: 10px;
+    font-size: 12px;
+    text-align: center;
+    color: #9ca3af;
+  }
 </style>
 </head>
 
 <body>
 
-<div class="panel">
+<div class="card">
   <h1>Greeks</h1>
 
   <table>
     <thead>
       <tr>
-        <th class="left">Greeks</th>
+        <th>Greeks</th>
         <th>CALL</th>
         <th>PUT</th>
         <th>DIFF</th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td class="left">Delta</td>
-        <td id="ceDelta"></td>
-        <td id="peDelta"></td>
-        <td id="deltaDiff"></td>
-      </tr>
-      <tr>
-        <td class="left">Vega</td>
-        <td id="ceVega"></td>
-        <td id="peVega"></td>
-        <td id="vegaDiff"></td>
-      </tr>
-      <tr>
-        <td class="left">Gamma</td>
-        <td id="ceGamma"></td>
-        <td id="peGamma"></td>
-        <td id="gammaDiff"></td>
-      </tr>
-      <tr>
-        <td class="left">Theta</td>
-        <td id="ceTheta"></td>
-        <td id="peTheta"></td>
-        <td id="thetaDiff"></td>
-      </tr>
-    </tbody>
+    <tbody id="rows"></tbody>
   </table>
 
-  <div class="decision">
-    <div id="biasBadge" class="badge none">NO TRADE</div>
-    <div id="biasText" class="sub">Waiting for alignment</div>
-    <div id="probText" class="prob"></div>
+  <div id="decisionBox" class="decision wait">
+    <div class="badge wait">WAIT</div>
+    <div id="decisionText">No clear alignment</div>
+    <div class="prob" id="probText"></div>
   </div>
 
   <div class="footer">Auto refresh • 5 sec</div>
 </div>
 
 <script>
-async function load(){
-  const r = await fetch('/api/greeks');
-  const d = await r.json();
+async function loadGreeks() {
+  const res = await fetch('/api/greeks');
+  const data = await res.json();
 
-  const CE = d.CE;
-  const PE = d.PE;
+  const CE = data.CE;
+  const PE = data.PE;
 
   const deltaDiff = CE.delta - Math.abs(PE.delta);
   const thetaDiff = PE.theta - CE.theta;
 
-  function set(id,val,good){
-    const e=document.getElementById(id);
-    e.textContent=val.toFixed(2);
-    e.className=good?'green':'red';
+  const rows = [
+    ['Delta', CE.delta, PE.delta, deltaDiff],
+    ['Vega', CE.vega, PE.vega, CE.vega - PE.vega],
+    ['Gamma', CE.gamma, PE.gamma, CE.gamma - PE.gamma],
+    ['Theta', CE.theta, PE.theta, thetaDiff]
+  ];
+
+  const tbody = document.getElementById('rows');
+  tbody.innerHTML = '';
+
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
+      <td>${r[0]}</td>
+      <td class="${r[1] > 0 ? 'green' : 'red'}">${r[1].toFixed(2)}</td>
+      <td class="${r[2] > 0 ? 'green' : 'red'}">${r[2].toFixed(2)}</td>
+      <td class="${r[3] > 0 ? 'green' : r[3] < 0 ? 'red' : 'neutral'}">
+        ${r[3].toFixed(2)}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const box = document.getElementById('decisionBox');
+  const badge = box.querySelector('.badge');
+  const text = document.getElementById('decisionText');
+  const prob = document.getElementById('probText');
+
+  let ceScore = Math.max(deltaDiff, 0) + Math.max(thetaDiff, 0);
+  let peScore = Math.max(-deltaDiff, 0) + Math.max(-thetaDiff, 0);
+  let total = ceScore + peScore || 1;
+
+  let cePct = Math.round((ceScore / total) * 100);
+  let pePct = 100 - cePct;
+
+  if (ceScore > peScore && ceScore > 0) {
+    box.className = 'decision ce';
+    badge.className = 'badge ce';
+    badge.textContent = 'CE BIAS';
+    text.textContent = 'Delta + Theta aligned';
+  } else if (peScore > ceScore && peScore > 0) {
+    box.className = 'decision pe';
+    badge.className = 'badge pe';
+    badge.textContent = 'PE BIAS';
+    text.textContent = 'Delta + Theta aligned';
+  } else {
+    box.className = 'decision wait';
+    badge.className = 'badge wait';
+    badge.textContent = 'NO TRADE';
+    text.textContent = 'Conflicting Greeks';
   }
 
-  set('ceDelta',CE.delta,CE.delta>0);
-  set('peDelta',PE.delta,PE.delta<0);
-  set('deltaDiff',deltaDiff,deltaDiff>0);
-
-  set('ceVega',CE.vega,true);
-  set('peVega',PE.vega,true);
-  set('vegaDiff',CE.vega-PE.vega,Math.abs(CE.vega-PE.vega)<1);
-
-  set('ceGamma',CE.gamma,true);
-  set('peGamma',PE.gamma,true);
-  set('gammaDiff',CE.gamma-PE.gamma,Math.abs(CE.gamma-PE.gamma)<0.001);
-
-  set('ceTheta',CE.theta,CE.theta<0);
-  set('peTheta',PE.theta,PE.theta<0);
-  set('thetaDiff',thetaDiff,thetaDiff>0);
-
-  let bias='none';
-  let ceProb=50, peProb=50;
-  let text='No clear edge';
-
-  if(deltaDiff>0 && thetaDiff>0){
-    bias='ce';
-    text='Delta + Theta aligned';
-    ceProb=60; peProb=40;
-  }
-  if(deltaDiff<0 && thetaDiff<0){
-    bias='pe';
-    text='Delta + Theta aligned';
-    ceProb=40; peProb=60;
-  }
-
-  const badge=document.getElementById('biasBadge');
-  badge.className='badge '+bias;
-  badge.textContent=bias==='ce'?'CE BIAS':bias==='pe'?'PE BIAS':'NO TRADE';
-
-  document.getElementById('biasText').textContent=text;
-  document.getElementById('probText').textContent=`CE: ${ceProb}% | PE: ${peProb}%`;
+  prob.textContent = `CE: ${cePct}% | PE: ${pePct}%`;
 }
 
-load();
-setInterval(load,5000);
+loadGreeks();
+setInterval(loadGreeks, 5000);
 </script>
 
 </body>
