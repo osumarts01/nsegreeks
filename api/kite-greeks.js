@@ -1,4 +1,5 @@
-import KiteConnect from "kiteconnect";
+import pkg from "kiteconnect";
+const KiteConnect = pkg.KiteConnect;
 
 export default async function handler(req, res) {
   try {
@@ -7,39 +8,28 @@ export default async function handler(req, res) {
 
     if (!apiKey || !accessToken) {
       return res.status(500).json({
-        error: "Kite API key or access token missing"
+        error: "KITE_API_KEY or KITE_ACCESS_TOKEN missing"
       });
     }
 
-    const kc = new KiteConnect({ api_key: apiKey });
+    const kc = new KiteConnect({
+      api_key: apiKey
+    });
+
     kc.setAccessToken(accessToken);
 
-    // NIFTY 50 instrument token = 256265
-    const quote = await kc.getQuote(["NSE:NIFTY 50"]);
+    // Simple live check (this MUST work first)
+    const profile = await kc.getProfile();
 
-    const ltp = quote["NSE:NIFTY 50"].last_price;
+    return res.status(200).json({
+      status: "KITE CONNECTED",
+      user: profile.user_name,
+      broker: profile.broker,
+      login_time: profile.login_time
+    });
 
-    // Dummy Greeks calculation placeholder (REAL data comes next step)
-    // This step only proves Kite connection works
-    const greeks = {
-      CE: {
-        delta: 0.55,
-        gamma: 0.0012,
-        vega: 9.2,
-        theta: -24.0
-      },
-      PE: {
-        delta: -0.45,
-        gamma: 0.0012,
-        vega: 9.2,
-        theta: -19.8
-      },
-      ltp
-    };
-
-    return res.status(200).json(greeks);
   } catch (err) {
-    console.error("Kite error:", err);
+    console.error("KITE ERROR:", err);
     return res.status(500).json({
       error: err.message || "Kite API failed"
     });
