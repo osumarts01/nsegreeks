@@ -3,23 +3,24 @@ const { KiteConnect } = pkg;
 
 export default async function handler(req, res) {
   try {
-    const kc = new KiteConnect({
-      api_key: process.env.KITE_API_KEY,
-      access_token: process.env.KITE_ACCESS_TOKEN
+    const apiKey = process.env.KITE_API_KEY;
+    const accessToken = process.env.KITE_ACCESS_TOKEN;
+
+    const kc = new KiteConnect({ api_key: apiKey });
+    kc.setAccessToken(accessToken);
+
+    // SIMPLE AUTH CHECK ONLY
+    const profile = await kc.getProfile();
+
+    return res.status(200).json({
+      status: "KITE CONNECTED",
+      user: profile.user_name,
+      broker: profile.broker
     });
 
-    // Example: NIFTY option instrument tokens (replace with real ones)
-    const instruments = [
-      "NFO:NIFTY25JAN26000CE",
-      "NFO:NIFTY25JAN26000PE"
-    ];
-
-    const quotes = await kc.getQuote(instruments);
-
-    res.status(200).json(quotes);
   } catch (err) {
-    res.status(500).json({
-      error: err.message || err.toString()
+    return res.status(500).json({
+      error: err.message || String(err)
     });
   }
 }
