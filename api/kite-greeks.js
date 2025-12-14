@@ -3,13 +3,20 @@ const { KiteConnect } = pkg;
 
 export default async function handler(req, res) {
   try {
-    const apiKey = process.env.KITE_API_KEY;
-    const accessToken = process.env.KITE_ACCESS_TOKEN;
+    const apiKey = (process.env.KITE_API_KEY || "").trim();
+    const accessToken = (process.env.KITE_ACCESS_TOKEN || "").trim();
 
-    const kc = new KiteConnect({ api_key: apiKey });
-    kc.setAccessToken(accessToken);
+    if (!apiKey || !accessToken) {
+      return res.status(500).json({ error: "Missing Kite credentials" });
+    }
 
-    // SIMPLE AUTH CHECK ONLY
+    // IMPORTANT: pass access_token in constructor
+    const kc = new KiteConnect({
+      api_key: apiKey,
+      access_token: accessToken
+    });
+
+    // Simple auth test
     const profile = await kc.getProfile();
 
     return res.status(200).json({
