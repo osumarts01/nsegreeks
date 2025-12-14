@@ -1,5 +1,4 @@
-import pkg from "kiteconnect";
-const KiteConnect = pkg.KiteConnect;
+import KiteConnect from "kiteconnect";
 
 export default async function handler(req, res) {
   try {
@@ -7,31 +6,23 @@ export default async function handler(req, res) {
     const accessToken = process.env.KITE_ACCESS_TOKEN;
 
     if (!apiKey || !accessToken) {
-      return res.status(500).json({
-        error: "KITE_API_KEY or KITE_ACCESS_TOKEN missing"
-      });
+      return res.status(500).json({ error: "Missing Kite credentials" });
     }
 
-    const kc = new KiteConnect({
-      api_key: apiKey
-    });
-
+    const kc = new KiteConnect({ api_key: apiKey });
     kc.setAccessToken(accessToken);
 
-    // Simple live check (this MUST work first)
-    const profile = await kc.getProfile();
+    // Example: NIFTY spot
+    const quote = await kc.getQuote(["NSE:NIFTY 50"]);
 
-    return res.status(200).json({
-      status: "KITE CONNECTED",
-      user: profile.user_name,
-      broker: profile.broker,
-      login_time: profile.login_time
+    res.status(200).json({
+      status: "OK",
+      ltp: quote["NSE:NIFTY 50"].last_price
     });
 
   } catch (err) {
-    console.error("KITE ERROR:", err);
-    return res.status(500).json({
-      error: err.message || "Kite API failed"
+    res.status(500).json({
+      error: err.message || err.toString()
     });
   }
 }
